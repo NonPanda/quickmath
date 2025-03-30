@@ -9,10 +9,10 @@ export default function DarkModeToggle() {
     },[theme]);
 
     return (
-        <div className="absolute top-4 right-4">
-            <button className={`cursor-pointer bg-gray-200 dark:bg-gray-800 rounded-full transition duration-300 ease-in-out p-2 ${theme==='light'?'hover:bg-gray-300':'hover:bg-gray-700'}`}
+        <div className="absolute top-4 right-4 hover:scale-110 transition duration-500 ease-in-out rounded-full">
+            <button className={`cursor-pointer dark:bg-gray-800 rounded-full transition duration-300 ease-in-out p-2 ${theme==='light'?'hover:bg-yellow-50':'hover:bg-gray-700'}`}
             onClick={()=>setTheme(theme==='light'?'dark':'light')}>
-                {theme==='light'?<Moon size={24} className="text-cyan-400"/>:<Sun size={24} className="text-yellow-400"/>}
+                {theme!=='light'?<Moon size={32} className="text-cyan-100"/>:<Sun size={32} className="text-yellow-400"/>}
             </button>
         </div>
     )
