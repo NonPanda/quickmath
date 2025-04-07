@@ -79,7 +79,7 @@ def preprocess_image(image_path, resize_dim=None):
         return final
 
     except Exception as e:
-        print(f"Error processing image: {str(e)}", file=sys.stderr) # Error to stderr
+        print(f"Error processing image: {str(e)}", file=sys.stderr) 
         return None
 
 def segment_digits(image):
