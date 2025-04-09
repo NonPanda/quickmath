@@ -127,15 +127,27 @@ export default function SlowMode({ started, setStarted }) {
 
     return (
 
-      <div className="min-h-screen py-8">
-        <div className="max-w-2xl mx-auto bg-white dark:bg-gray-800 rounded-3xl shadow-md overflow-hidden border border-gray-200 dark:border-gray-700">
-          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
-            <div className="flex gap-4 items-center">
+      <div className="min-h-screen pt-8">
+        <div className="max-w-2xl mx-auto bg-[#FAFAF8] dark:bg-gray-800 rounded-3xl shadow-md overflow-hidden border border-gray-200 dark:border-gray-700">
+          <div className="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-800 dark:border-gray-700">
+            <div className="flex gap-4 items-center text-xl font-bold text-stext dark:text-white">
              
                 Score: {score}
               
             
             </div>
+
+            <div> 
+                {feedback && (
+                  <div className={`text-center ${
+                    feedback.status === "success" 
+                      ? " text-green-800 dark:bg-green-900 dark:text-green-100" 
+                      : " text-red-800 dark:bg-red-900 dark:text-red-100"
+                  }`}>
+                    {feedback.message}
+                  </div>
+                )}
+              </div>
     
             <button
               onClick={generateProblem}
@@ -150,35 +162,33 @@ export default function SlowMode({ started, setStarted }) {
             </button>
           </div>
     
-          <div className="p-4 flex flex-col gap-4">
-            <div className="text-4xl md:text-6xl font-bold text-gray-800 dark:text-white text-center py-4">
+          <div className="pb-4 px-16 flex flex-col gap-4">
+            <div className="text-4xl md:text-6xl font-bold text-ptext dark:text-white text-center py-4">
               {problem.question}
             </div>
             
-            <div className="bg-gray-100 dark:bg-gray-700 rounded-t-xl overflow-hidden flex flex-col border border-gray-200 dark:border-gray-600" style={{ minHeight: '400px' }}> 
-              <div className="p-4 bg-gray-200 dark:bg-gray-600 flex justify-between items-center">
-                <h3 className="font-semibold text-black dark:text-white flex items-center">
+            <div className="bg-gray-200 dark:bg-gray-700 rounded-t-xl overflow-hidden flex flex-col border border-gray-200 dark:border-gray-600" style={{ minHeight: '400px' }}> 
+              <div className="px-6 pt-2 bg-gray-200 dark:bg-gray-600 flex justify-between items-center">
+                <h3 className="font-semibold text-stext dark:text-white flex items-center text-2xl">
                   Your Answer
-                  <Pencil size={18} className="ml-2 text-black//90 dark:text-gray-300" />
+                  <Pencil size={24} className="ml-4 text-stext/90 dark:text-gray-300 " />
                 </h3>
                 <button
                   onClick={clearCanvas}
-                  className="px-3 py-1.5 font-semibold bg-red-500 dark:bg-red-600 hover:bg-red-600 dark:hover:bg-red-700 text-white rounded-lg transition text-sm"
+                  className="px-3 py-1.5 font-semibold bg-[#E94F37] dark:bg-red-600 hover:bg-red-600 dark:hover:bg-red-700 text-ttext rounded-lg transition text-lg"
                 >
                   Clear
                 </button>
               </div>
-              <div className="flex-grow p-4 relative">
-                <div className="absolute inset-1">
+              <div className="flex-grow px-4 relative">
+                <div className="absolute inset-2">
                   <ReactSketchCanvas
                     ref={canvasRef}
                     style={{ 
-                      borderRadius: '5rem', 
                       width: "100%", 
                       height: "100%",
-                      boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)"
                     }}
-                    canvasColor="white"
+                    canvasColor="#FFF6D8"
                     strokeWidth={6} 
                     strokeColor="black"
                   />
@@ -186,26 +196,15 @@ export default function SlowMode({ started, setStarted }) {
               </div>
             </div>
     
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex-grow"> 
-                {feedback && (
-                  <div className={`p-3 rounded-lg text-center shadow-sm ${
-                    feedback.status === "success" 
-                      ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100" 
-                      : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100"
-                  }`}>
-                    {feedback.message}
-                  </div>
-                )}
-              </div>
+              
               
               <button
                 onClick={predictAndCheck}
                 disabled={isProcessing} 
-                className={`p-4 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 font-medium min-w-[140px] border-2 border-b-4 border-emerald-700 border-b-emerald-800  ${
+                className={`p-4 mx-auto rounded-xl transition-all duration-300 flex items-center justify-center gap-2 font-medium min-w-[270px]   shadow-md text-xl  ${
                   isProcessing 
                     ? 'bg-gray-400 cursor-not-allowed text-gray-200' 
-                    : 'bg-emerald-600 hover:bg-emerald-700 text-white hover:scale-105'
+                    : 'bg-emerald-600 hover:bg-emerald-700 text-ttext hover:scale-105 border-emerald-600 border-b-emerald-800 border-b-4'
                 }`}
               >
                 {isProcessing ? (
@@ -221,7 +220,6 @@ export default function SlowMode({ started, setStarted }) {
                 )}
               </button>
             </div>
-          </div>
         </div>
       </div>
     );

@@ -1,6 +1,7 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
-@theme {
+
+@theme{
   /* Light theme colors */
   --background: #ffffff;
   --foreground: #000000;
@@ -10,24 +11,15 @@
   --secondary-foreground: #ffffff;
   --accent: #10b981;
   --accent-foreground: #ffffff;
+  --color-ptext: #1D2B3A;
+  --color-stext: #4B5563;
+  --color-ttext: #FDFDFD;
+  --color-card: #FFF6D8;
+
 }
 
-[data-theme='dark'] {
-  /* Dark theme colors */
-  --background: #121212;
-  --foreground: #ffffff;
-  --primary: #1e40af;
-  --primary-foreground: #ffffff;
-  --secondary: #4b5563;
-  --secondary-foreground: #ffffff;
-  --accent: #059669;
-  --accent-foreground: #ffffff;
-}
 
-body {
-  background-color: var(--background);
-  color: var(--foreground);
-}
+
 
 @layer base {
   button:not(:disabled),
