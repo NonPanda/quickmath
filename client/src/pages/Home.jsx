@@ -1,18 +1,21 @@
 import React, { useState, useEffect, useRef } from "react";
-import { ArrowRight, RefreshCw, BrainCircuit, Lightbulb, Award, Pencil } from "lucide-react"; 
+import { ArrowRight, RefreshCw, BrainCircuit, Lightbulb, Award, Pencil,ArrowLeft } from "lucide-react"; 
 import DarkModeToggle from "../components/DarkModeToggle";
 import SlowMode from "../components/SlowMode";
 
 export default function Home() {
   const [started, setStarted] = useState(false);
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-indigo-950 transition-colors duration-500">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-gray-950 dark:via-gray-800 dark:to-slate-950 transition-colors duration-500">
       <DarkModeToggle />
       
 
-      <div className={`w-full max-w-6xl transition-all duration-700 ease-in-out transform ${started ? "scale-100 opacity-100" : "scale-95 opacity-90"}`}>
+      <div className={`w-full max-w-6xl transition-all duration-100 ease-in-out transform ${started ? "scale-100 opacity-100" : "scale-95 opacity-90"}`}>
         {started ? (
+        <div>
+      <ArrowLeft className="absolute top-12 left-4 text-stext hover:text-ptext hover:scale-105 transition-all duration-300 dark:text-gray-300 cursor-pointer" onClick={() => setStarted(false)} size={24} />
        <SlowMode setStarted={setStarted} started={started} />
+       </div>
         ) : (
           <div className="flex flex-col items-center justify-center p-10 text-center">
             <div className="relative">
@@ -33,7 +36,7 @@ export default function Home() {
             </button>
             
             <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-4xl">
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md hover:shadow-lg transition-all border-2 border-gray-200 dark:border-gray-600">
+              <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md hover:shadow-lg transition-all border-2 border-gray-200 dark:border-gray-700">
                 <div className="bg-blue-100 dark:bg-blue-900 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
                   <BrainCircuit size={24} className="text-blue-600 dark:text-blue-300" />
                 </div>
@@ -41,7 +44,7 @@ export default function Home() {
                 <p className="text-gray-600 dark:text-gray-300 mt-2">Advanced AI recognizes your handwritten answers and provides immediate feedback.</p>
               </div>
               
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md hover:shadow-lg transition-all border-2 border-gray-200 dark:border-gray-600">
+              <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md hover:shadow-lg transition-all border-2 border-gray-200 dark:border-gray-700">
                 <div className="bg-green-100 dark:bg-green-900 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
                   <RefreshCw size={24} className="text-green-600 dark:text-green-300" />
                 </div>
@@ -49,7 +52,7 @@ export default function Home() {
                 <p className="text-gray-600 dark:text-gray-300 mt-2">Generate as many problems as you need to master your math skills.</p>
               </div>
               
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md hover:shadow-lg transition-all border-2 border-gray-200 dark:border-gray-600">
+              <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md hover:shadow-lg transition-all border-2 border-gray-200 dark:border-gray-700">
                 <div className="bg-purple-100 dark:bg-purple-900 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Award size={24} className="text-purple-600 dark:text-purple-300" />
                 </div>
