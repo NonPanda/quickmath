@@ -1,20 +1,32 @@
 import React, { useState, useEffect, useRef } from "react";
-import { ArrowRight, RefreshCw, BrainCircuit, Lightbulb, Award, Pencil } from "lucide-react"; 
+import { ArrowRight, RefreshCw, Lightbulb, Award, Pencil, CheckCircle } from "lucide-react"; 
 import { ReactSketchCanvas } from "react-sketch-canvas";
-import DarkModeToggle from "../components/DarkModeToggle";
 
 
-const BACKEND_URL = "http://localhost:8000"; 
+const BACKEND_URL="http://localhost:8000"; 
 
-export default function Home() {
-  const [started, setStarted] = useState(false);
+export default function QuickMode({ started, setStarted }){
+
   const [problem, setProblem] = useState({ question: "", answer: 0 });
   const [feedback, setFeedback] = useState(null);
   const [score, setScore] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [streak, setStreak] = useState(0);
+  const [index, setIndex] = useState(0);
+  const [problems, setProblems] = useState([]);
 
+  const isDarkMode= localStorage.getItem('theme')==='dark';
+
+  
   const canvasRef = useRef(null);
+
+  const startSessions=()=>{
+
+    let sessionProblems = Array.from({ length: 3 }, () => generateProblem());
+    setProblems(sessionProblems); 
+    setProblem(sessionProblems[0]);
+    console.log(sessionProblems);
+    console.log("Session started with problems:", sessionProblems);
+  };
 
   const generateProblem = () => {
     let num1, num2, operation, question, answer;
@@ -39,16 +51,13 @@ export default function Home() {
       question = `${num1} × ${num2} = ?`;
       answer = num1 * num2;
     }
-    
-    setProblem({ question, answer });
-    setIsProcessing(false);
-    setFeedback(null);
-    clearCanvas();
+
+    return {question,answer};
   };
 
   useEffect(() => {
     if (started) {
-      generateProblem();
+      startSessions();
     }
   }, [started]);
 
@@ -59,16 +68,6 @@ export default function Home() {
     }
   };
 
-  const exportCanvas = () => { 
-    if (canvasRef.current) {
-      canvasRef.current.exportImage("png").then((dataUrl) => {
-        const link = document.createElement("a");
-        link.href = dataUrl;
-        link.download = `quickmath_problem_${Date.now()}.png`;
-        link.click();
-      });
-    }
-  };
 
   const predictAndCheck = async () => {
     if (!canvasRef.current) return;
@@ -77,7 +76,6 @@ export default function Home() {
 
     try {
       const imageDataUrl = await canvasRef.current.exportImage("png");
-
       if (!imageDataUrl) {
         throw new Error("Could not export canvas image.");
       }
@@ -114,18 +112,28 @@ export default function Home() {
           message: `Correct! You wrote ${predictedAnswer}.` 
         });
         setScore((prevScore) => prevScore + 1);
-        setStreak((prevStreak) => prevStreak + 1);
       
         
         setTimeout(() => {
-          generateProblem(); 
+          
+        setIndex((prevIndex)=>{
+          const newIndex=prevIndex+1;
+          problems[newIndex+1]=generateProblem();
+          setProblems([...problems]);
+          setProblem(problems[newIndex]);
+          return newIndex;
+        });
+
+        
+          clearCanvas();
+          setFeedback(null);
+          
         }, 1500);
       } else {
         setFeedback({
           status: "error",
           message: `Hmm, AI read ${predictedAnswer}. The answer is ${problem.answer}. Try again!`,
         });
-        setStreak(0);
       }
     } catch (error) {
       console.error("Prediction Error:", error);
@@ -138,175 +146,112 @@ export default function Home() {
     }
   };
 
-  return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-gray-900 dark:via-gray-800 dark:to-indigo-950 transition-colors duration-500">
-      <DarkModeToggle />
+    return (
+
+      <div className="min-h-screen pt-12">
+  <div className="flex flex-col md:flex-row gap-6 p-6 h-full max-w-6xl mx-auto">
+    <div className="w-full md:w-1/2 bg-[#FAFAF8] dark:bg-gradient-to-t dark:from-gray-900 dark:via-gray-950/90 dark:to-gray-950 rounded-3xl shadow-md overflow-hidden border border-gray-200 dark:border-gray-700">
+      <div className="flex items-center justify-between px-6 pt-4 bg-gray-50 dark:bg-gradient-to-b dark:from-gray-900/95 dark:via-gray-900 dark:to-gray-950 dark:border-gray-700">
+        <div className="flex gap-4 items-center text-xl font-semibold text-stext">
+          Score: {score}
+        </div>
+
+        <div> 
+          {feedback && (
+            <div className={`text-center px-3 py-2 rounded-xl ${
+              feedback.status === "success" 
+                ? "text-green-800 dark:bg-green-900 dark:text-green-100" 
+                : "text-red-800 dark:bg-red-900 dark:text-red-100"
+            }`}>
+              {feedback.message}
+            </div>
+          )}
+        </div>
+
+        <button
+          onClick={generateProblem}
+          disabled={isProcessing} 
+          className={`flex items-center justify-center gap-2 p-2 rounded-xl w-12 h-12 transition-all duration-300 ${
+            isProcessing 
+              ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
+              : 'hover:text-ptext text-stext hover:scale-110'
+          }`}
+        >
+          <RefreshCw size={24} />
+        </button>
+      </div>
+      <div className="flex flex-col items-center space-y-4 md:space-y-6 py-8">
+        <div className="text-xl md:text-2xl text-gray-400 dark:text-gray-500 italic h-[48px] md:h-[56px] flex items-center justify-center">
+          {index > 0 && problems[index - 1] ? problems[index - 1].question : <span>&nbsp;</span>}
+        </div>
+
+        <div className="text-5xl md:text-6xl font-bold text-ptext dark:text-white text-center leading-snug">
+          {problems[index] ? problems[index].question : ""}
+        </div>
+
+        <div className="text-xl md:text-2xl text-gray-400 dark:text-gray-500 italic h-[48px] md:h-[56px] flex items-center justify-center">
+          {problems[index + 1] ? problems[index + 1].question : <span>&nbsp;</span>}
+        </div>
+      </div>
+
+
       
-
-      <div className={`w-full max-w-6xl transition-all duration-700 ease-in-out transform ${started ? "scale-100 opacity-100" : "scale-95 opacity-90"}`}>
-        {started ? (
-          <div className="flex flex-col md:flex-row gap-6 p-6 h-full">
-            <div className="w-full md:w-1/2 bg-white dark:bg-gray-800 rounded-2xl shadow-xl overflow-hidden transition-colors duration-300 flex flex-col backdrop-blur-sm bg-opacity-90 dark:bg-opacity-90 border border-gray-100 dark:border-gray-700">
-              <div className="p-8 flex flex-col items-center justify-center flex-grow relative">
-                <div className="flex gap-4 absolute top-2 left-2">
-                  <div className="bg-gradient-to-r from-blue-500 to-indigo-600 dark:from-blue-600 dark:to-indigo-700 text-white px-4 py-2 rounded-full text-sm font-semibold flex items-center gap-2 shadow-lg">
-                    <Award size={16} />
-                    Score: {score}
-                  </div>
-                  
-                  {streak > 0 && (
-                    <div className="bg-gradient-to-r from-amber-500 to-orange-500 dark:from-amber-600 dark:to-orange-600 text-white px-4 py-2 rounded-full text-sm font-semibold flex items-center gap-2 shadow-lg animate-pulse">
-                      <Lightbulb size={16} />
-                      Streak: {streak}
-                    </div>
-                  )}
-                </div>
-
-                <div className="text-4xl md:text-6xl font-bold my-12 text-gray-800 dark:text-white text-center">
-                  {problem.question}
-                </div>
-
-                <div className="flex flex-row w-full max-w-sm gap-4 mt-auto">
-                  <div className="h-12 transition-all"> 
-                    {feedback && (
-                      <div className={`p-3 rounded-lg text-center shadow-md transform transition-all duration-300 ${
-                        feedback.status === "success" 
-                          ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100 scale-105" 
-                          : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-100"
-                      }`}>
-                        {feedback.message}
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="flex gap-2 mt-2">
-                    <button
-                      onClick={predictAndCheck}
-                      disabled={isProcessing} 
-                      className={`p-4 w-full rounded-xl transition-all duration-300 transform hover:scale-102 hover:shadow-lg flex items-center justify-center gap-2 font-medium ${
-                        isProcessing 
-                          ? 'bg-gray-400 cursor-not-allowed text-gray-200' 
-                          : 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white'
-                      }`}
-                    >
-                      {isProcessing ? (
-                        <>
-                          <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white"></div>
-                          <span>Processing...</span>
-                        </>
-                      ) : (
-                        <>
-                          <BrainCircuit size={20} /> 
-                          <span>Check Answer</span>
-                        </>
-                      )}
-                    </button>
-                  </div>
-                  
-                    <button
-                      onClick={generateProblem}
-                      disabled={isProcessing} 
-                      className={`flex items-center justify-center gap-2 p-3 rounded-xl transition-all duration-300 transform hover:scale-102 hover:shadow-lg font-medium ${
-                        isProcessing 
-                          ? 'bg-gray-400 text-gray-200 cursor-not-allowed' 
-                          : 'bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white'
-                      }`}
-                    >
-                      <RefreshCw size={18} />
-                    </button>
-                </div>
-              </div>
-            </div>
-
-            <div className="w-full md:w-1/2 bg-gray-100 dark:bg-gray-700 rounded-2xl shadow-xl overflow-hidden flex flex-col transition-colors duration-300 border border-gray-200 dark:border-gray-600" style={{ minHeight: '500px' }}> 
-              <div className="p-4 bg-gray-200 dark:bg-gray-600 flex justify-between items-center flex-shrink-0">
-                <h3 className="font-semibold text-gray-800/60 dark:text-white flex items-center">
-                  Work it out here
-                </h3>
-                <div>
-                  <button
-                    onClick={clearCanvas}
-                    className="px-3 py-1.5 mr-2 bg-red-500 dark:bg-red-600 hover:bg-red-600 dark:hover:bg-red-700 text-white rounded-md transition text-sm shadow-md"
-                    title="Clear Canvas"
-                  >
-                    Clear
-                  </button>
-                  <button
-                    onClick={exportCanvas}
-                    className="px-3 py-1.5 bg-blue-500 dark:bg-blue-600 hover:bg-blue-600 dark:hover:bg-blue-700 text-white rounded-md transition text-sm shadow-md"
-                    title="Download Canvas Image"
-                  >
-                    Export
-                  </button>
-                </div>
-              </div>
-              <div className="flex-grow p-4 relative">
-                <div className="absolute top-1 right-1 bottom-1 left-1">
-                  <ReactSketchCanvas
-                    ref={canvasRef}
-                    style={{ 
-                      border: "2px solid #ccc", 
-                      borderRadius: '0.75rem', 
-                      width: "100%", 
-                      height: "100%",
-                      boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)"
-                    }}
-                    canvasColor="white"
-                    strokeWidth={6} 
-                    strokeColor="black"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="flex flex-col items-center justify-center p-10 text-center">
-            <div className="relative">
-              <h1 className="text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 mb-4">
-                QuickMath AI
-              </h1>
-              <Pencil className="absolute -top-8 -right-8 text-4xl text-blue-500 dark:text-blue-300" size={30} />
-            </div>
-            
-            <p className="text-xl text-gray-700 dark:text-gray-300 max-w-lg mb-8 leading-relaxed">
-              Practice math problems interactively! Draw your answers and let AI evaluate them in real-time.
-            </p>
-            
-            <button
-              onClick={() => setStarted(true)}
-              className="bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-500 dark:to-indigo-700 text-white font-bold text-lg py-4 px-10 rounded-full shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center"
-            >
-              Start Learning <ArrowRight className="ml-2" size={20} />
-            </button>
-            
-            <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-4xl">
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md hover:shadow-lg transition-all border-2 border-gray-200 dark:border-gray-600">
-                <div className="bg-blue-100 dark:bg-blue-900 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <BrainCircuit size={24} className="text-blue-600 dark:text-blue-300" />
-                </div>
-                <h3 className="text-lg font-bold text-gray-800 dark:text-white">AI Powered</h3>
-                <p className="text-gray-600 dark:text-gray-300 mt-2">Advanced AI recognizes your handwritten answers and provides immediate feedback.</p>
-              </div>
-              
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md hover:shadow-lg transition-all border-2 border-gray-200 dark:border-gray-600">
-                <div className="bg-green-100 dark:bg-green-900 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <RefreshCw size={24} className="text-green-600 dark:text-green-300" />
-                </div>
-                <h3 className="text-lg font-bold text-gray-800 dark:text-white">Unlimited Practice</h3>
-                <p className="text-gray-600 dark:text-gray-300 mt-2">Generate as many problems as you need to master your math skills.</p>
-              </div>
-              
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md hover:shadow-lg transition-all border-2 border-gray-200 dark:border-gray-600">
-                <div className="bg-purple-100 dark:bg-purple-900 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Award size={24} className="text-purple-600 dark:text-purple-300" />
-                </div>
-                <h3 className="text-lg font-bold text-gray-800 dark:text-white">Track Progress</h3>
-                <p className="text-gray-600 dark:text-gray-300 mt-2">Keep track of your score and achievement streaks as you improve.</p>
-              </div>
-            </div>
-          </div>
-        )}
+      <div className="p-4 flex justify-center">
+        <button
+          onClick={predictAndCheck}
+          disabled={isProcessing} 
+          className={`p-4 rounded-xl transition-all duration-300 flex items-center justify-center gap-2 font-medium min-w-[250px] shadow-md text-xl ${
+            isProcessing 
+              ? 'bg-gray-400 cursor-not-allowed text-gray-200' 
+              : 'bg-emerald-600 hover:bg-emerald-700 text-ttext hover:scale-105 border-emerald-600 border-b-emerald-700 border-b-4 dark:bg-blue-600 dark:border-b-blue-700 dark:hover:bg-blue-700'
+          }`}
+        >
+          {isProcessing ? (
+            <>
+              <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white"></div>
+              <span>Processing...</span>
+            </>
+          ) : (
+            <>
+              <CheckCircle size={20} /> 
+              <span>Check Answer</span>
+            </>
+          )}
+        </button>
       </div>
     </div>
-  );
+
+    <div className="w-full md:w-1/2 bg-gray-200 dark:bg-[#1F1F2E] rounded-3xl shadow-md overflow-hidden flex flex-col border border-gray-200 dark:border-gray-800" style={{ minHeight: '500px' }}> 
+      <div className="px-6 pt-4 bg-gray-200 dark:bg-[#1F1F2E] flex justify-between items-center">
+        <h3 className="font-semibold text-stext flex items-center text-2xl">
+          Your Answer
+          <Pencil size={24} className="ml-4 text-stext/90" />
+        </h3>
+        <button
+          onClick={clearCanvas}
+          className="px-3 py-1.5 font-bold bg-[#E94F37] hover:bg-red-600 text-ttext rounded-lg transition text-lg dark:bg-blue-600 dark:hover:bg-blue-700 duration-300 flex items-center gap-2"
+          disabled={isProcessing}
+        >
+          Clear
+        </button>
+      </div>
+      <div className="flex-grow p-4 relative">
+        <div className="absolute inset-2">
+          <ReactSketchCanvas
+            ref={canvasRef}
+            style={{ 
+              width: "100%", 
+              height: "100%",
+            }}
+            strokeWidth={6} 
+            canvasColor={isDarkMode ? "#0305139c" : "#FFF6D8"}
+            strokeColor={isDarkMode ? "#FDFDFD" : "#4B5563"}
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    );
+
 }
