@@ -100,7 +100,8 @@ export default function QuickMode({ started, setStarted }){
       }
 
       const result = await response.json();
-      const predictedAnswer = parseInt(result.prediction, 10); 
+      console.log("Prediction result:", result.predictions.full_number);
+      const predictedAnswer = parseInt(result.predictions.full_number, 10); 
 
       if (isNaN(predictedAnswer)) {
         throw new Error(`Received invalid prediction: ${result.prediction}`);

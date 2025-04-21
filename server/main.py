@@ -8,6 +8,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import aiofiles
 import asyncio
+import time 
+from cnn.predict import load_model, predict_multiple_digits
+
+start_time = time.time()
 
 PREDICT_SCRIPT = os.path.join("cnn", "predict.py")
 PYTHON_EXECUTABLE = "python"
@@ -16,12 +20,15 @@ if not os.path.isfile(PREDICT_SCRIPT):
     print(f"ERROR: Prediction script not found at {PREDICT_SCRIPT}")
 
 
+model=load_model()
 app = FastAPI()
+
 
 origins = [
     "http://localhost:3000",
     "http://localhost:5173",
 ]
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -51,42 +58,12 @@ async def predict_image(image_data: ImageData):
         async with aiofiles.open(temp_image_path, "wb") as temp_file:
             await temp_file.write(image_bytes)
 
-        if not os.path.isfile(PREDICT_SCRIPT):
-             raise HTTPException(status_code=500, detail=f"Prediction script not found at {PREDICT_SCRIPT}")
-
-        command = [PYTHON_EXECUTABLE, PREDICT_SCRIPT, temp_image_path]
-
-        print(f"Running command: {' '.join(command)}")
-
-        process = await asyncio.create_subprocess_exec(
-            *command,
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE,
-            cwd=os.path.dirname(os.path.abspath(__file__))
-        )
-
-        stdout, stderr = await process.communicate()
-
-        stdout_str = stdout.decode().strip()
-        stderr_str = stderr.decode().strip()
-
-        if process.returncode != 0:
-            print(f"Prediction script error (stderr): {stderr_str}")
-            raise HTTPException(status_code=500, detail=f"Prediction script failed: {stderr_str}")
-
-        if not stdout_str:
-             print(f"Prediction script error: No output received (stderr: {stderr_str})")
-             raise HTTPException(status_code=500, detail="Prediction script returned no output.")
-
-        prediction = stdout_str
-        print(f"Prediction successful: {prediction}")
-
+        results=predict_multiple_digits(temp_image_path, model)
         try:
             os.remove(temp_image_path)
         except OSError as e:
             print(f"Warning: Could not remove temporary file {temp_image_path}: {e}")
-
-        return {"prediction": prediction}
+        return {"predictions": results}
 
     except ValueError as e:
          print(f"Error decoding base64 string: {e}")

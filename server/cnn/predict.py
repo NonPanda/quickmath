@@ -1,7 +1,7 @@
 # predict.py
 import numpy as np
 import tensorflow as tf
-
+import time
 import cv2
 import sys 
 
@@ -92,6 +92,7 @@ def segment_digits(image):
     Returns:
         List of segmented and normalized digit images
     """
+
     original = image.copy()
 
     denoised1 = cv2.medianBlur(image, 3)
@@ -218,11 +219,11 @@ def predict_multiple_digits(image_path, model=None):
     image = preprocess_image(image_path)
     if image is None:
         return {'error': 'Failed to process image'}
-
     digit_images = segment_digits(image)
     if not digit_images:
         print("Initial segmentation failed, trying alternative approach...", file=sys.stderr)
         return {'error': 'No digits found in the image'}
+
 
     results = []
     for i, digit_image in enumerate(digit_images):
@@ -270,44 +271,3 @@ def visualize_segmentation(image_path, output_path='segmentation_visualization.p
             cv2.putText(visualization, str(i), (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (36, 255, 12), 2)
     cv2.imwrite(output_path, visualization)
     print(f"Visualization saved to {output_path}", file=sys.stderr)
-
-
-if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Usage: python predict.py <image_path> [--visualize]", file=sys.stderr)
-        sys.exit(1)
-
-    image_path = sys.argv[1]
-
-    if len(sys.argv) > 2 and sys.argv[2] == '--visualize':
-        try:
-            visualize_segmentation(image_path)
-        except Exception as viz_e:
-            print(f"Error during visualization: {viz_e}", file=sys.stderr)
-
-    try:
-        model = load_model()
-        if model is None:
-             sys.exit(1)
-
-        results = predict_multiple_digits(image_path, model=model)
-
-        if 'error' in results:
-            print(f"Prediction Error: {results['error']}", file=sys.stderr)
-            sys.exit(1) 
-        else:
-            print(results['full_number'])
-
-            print(f"\n--- Prediction Details (stderr) ---", file=sys.stderr)
-            print(f"Image Path: {image_path}", file=sys.stderr)
-            print(f"Predicted Number (stdout): {results['full_number']}", file=sys.stderr)
-            print(f"Found {results['digit_count']} digits:", file=sys.stderr)
-            for digit_result in results['digits']:
-                print(f"  Pos {digit_result['position']}: Digit {digit_result['digit']} (Conf: {digit_result['confidence']:.4f})", file=sys.stderr)
-            print(f"--- End Details ---", file=sys.stderr)
-
-    except Exception as e:
-        print(f"An unexpected error occurred: {e}", file=sys.stderr)
-        import traceback
-        print(traceback.format_exc(), file=sys.stderr)
-        sys.exit(1) 
