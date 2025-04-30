@@ -8,7 +8,6 @@ export default function Home() {
   const [started, setStarted] = useState(false);
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-slate-950 dark:via-gray-950/90 dark:to-black transition-colors duration-500">
-      <DarkModeToggle />
       
 
       <div className={`w-full max-w-6xl transition-all duration-100 ease-in-out transform ${started ? "scale-100 opacity-100" : "scale-95 opacity-90"}`}>
@@ -22,6 +21,8 @@ export default function Home() {
         )}
        </div>
         ) : (
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <DarkModeToggle />
           <div className="flex flex-col items-center justify-center p-10 text-center">
             <div className="relative">
               <h1 className="text-6xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-400 dark:to-indigo-400 mb-4">
@@ -74,6 +75,7 @@ export default function Home() {
               </div>
             </div>
           </div>
+        </div>
         )}
       </div>
     </div>

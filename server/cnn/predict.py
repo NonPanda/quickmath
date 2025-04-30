@@ -182,9 +182,10 @@ def segment_digits(image):
 
     return digit_images
 
+
 def predict_digit(digit_image, model):
     """
-    Predict a single digit.
+    Predict a single digit with improved preprocessing and confidence handling.
 
     Args:
         digit_image: 28x28 numpy array containing a digit
@@ -194,15 +195,57 @@ def predict_digit(digit_image, model):
         Predicted digit and confidence
     """
     img_array = digit_image.astype('float32') / 255.0
+    threshold = 0.3
+    img_array = np.where(img_array > threshold, img_array, 0)
+    
+    if np.max(img_array) > 0:  
+        img_array = (img_array - np.min(img_array)) / (np.max(img_array) - np.min(img_array))
+    
+    rows, cols = np.indices(img_array.shape)
+    if np.sum(img_array) > 0:  
+        center_y = np.sum(rows * img_array) / np.sum(img_array)
+        center_x = np.sum(cols * img_array) / np.sum(img_array)
+        
+        shift_y = int(14 - center_y) 
+        shift_x = int(14 - center_x)
+        
+        img_array = np.roll(img_array, shift_y, axis=0)
+        img_array = np.roll(img_array, shift_x, axis=1)
+    
     img_array = img_array.reshape(1, 28, 28, 1)
     prediction = model.predict(img_array, verbose=0)
     digit = np.argmax(prediction[0])
     confidence = float(prediction[0][digit])
+    
+    sorted_indices = np.argsort(prediction[0])[::-1]
+    top_two_indices = sorted_indices[:2]
+    
+    if len(top_two_indices) > 1:
+        top_diff = prediction[0][top_two_indices[0]] - prediction[0][top_two_indices[1]]
+        if top_diff < 0.1: 
+            confidence *= 0.8 
+    
+    confusion_pairs = {
+        5: 3, 3: 5,  
+        8: 5, 5: 8,  
+        7: 1, 1: 7,  
+        9: 4, 4: 9, 
+        0: 6, 6: 0  
+    }
+    
+    if digit in confusion_pairs and confidence < 0.8:
+        alt_digit = confusion_pairs[digit]
+        alt_confidence = float(prediction[0][alt_digit])
+        
+        if alt_confidence > 0.7 * confidence:
+            if digit == 1 and alt_digit == 7:
+                confidence *= 1.1  
+    
     return digit, confidence
 
 def predict_multiple_digits(image_path, model=None):
     """
-    Predict multiple digits from an image.
+    Predict multiple digits from an image with improved error handling.
 
     Args:
         image_path: Path to the image file
@@ -219,21 +262,24 @@ def predict_multiple_digits(image_path, model=None):
     image = preprocess_image(image_path)
     if image is None:
         return {'error': 'Failed to process image'}
+        
     digit_images = segment_digits(image)
-    if not digit_images:
-        print("Initial segmentation failed, trying alternative approach...", file=sys.stderr)
-        return {'error': 'No digits found in the image'}
-
-
+    
     results = []
     for i, digit_image in enumerate(digit_images):
         digit, confidence = predict_digit(digit_image, model)
+        
+        if i > 0 and len(results) > 0:
+            prev_digit = results[-1]['digit']
+            if prev_digit == '-' and digit == '-':
+                continue
+                
         results.append({
             'position': i,
             'digit': int(digit),
             'confidence': confidence
         })
-
+    
     number = ''.join(str(result['digit']) for result in results)
 
     return {
@@ -241,6 +287,7 @@ def predict_multiple_digits(image_path, model=None):
         'digits': results,
         'digit_count': len(results)
     }
+
 
 def visualize_segmentation(image_path, output_path='segmentation_visualization.png'):
     """

@@ -149,7 +149,7 @@ export default function QuickMode({ started, setStarted }){
 
     return (
 
-      <div className="min-h-screen pt-12">
+      <div className="min-h-screen pt-24">
   <div className="flex flex-col md:flex-row gap-6 p-6 h-full max-w-6xl mx-auto">
     <div className="w-full md:w-1/2 bg-[#FAFAF8] dark:bg-gradient-to-t dark:from-gray-900 dark:via-gray-950/90 dark:to-gray-950 rounded-3xl shadow-md overflow-hidden border border-gray-200 dark:border-gray-700">
       <div className="flex items-center justify-between px-6 pt-4 bg-gray-50 dark:bg-gradient-to-b dark:from-gray-900/95 dark:via-gray-900 dark:to-gray-950 dark:border-gray-700">
@@ -222,8 +222,8 @@ export default function QuickMode({ started, setStarted }){
       </div>
     </div>
 
-    <div className="w-full md:w-1/2 bg-gray-200 dark:bg-[#1F1F2E] rounded-3xl shadow-md overflow-hidden flex flex-col border border-gray-200 dark:border-gray-800" style={{ minHeight: '500px' }}> 
-      <div className="px-6 pt-4 bg-gray-200 dark:bg-[#1F1F2E] flex justify-between items-center">
+    <div className="w-full md:w-1/2 bg-[#f9f9f1] dark:bg-[#1F1F2E] rounded-t-3xl shadow-md overflow-hidden flex flex-col border border-gray-200 dark:border-gray-800" style={{ minHeight: '500px' }}> 
+      <div className="px-6 pt-4 bg-[#FAFAF8] dark:bg-gradient-to-t dark:from-gray-900 dark:via-gray-950/90 dark:to-gray-950 flex justify-between items-center">
         <h3 className="font-semibold text-stext flex items-center text-2xl">
           Your Answer
           <Pencil size={24} className="ml-4 text-stext/90" />
