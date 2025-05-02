@@ -48,6 +48,15 @@ export default function SlowMode({ started, setStarted }) {
   };
 
   useEffect(() => {
+    if (canvasRef.current) {
+      canvasRef.current.getSketchingTime().then((time) => {
+        console.log("Sketching time:", time); 
+      }
+    );
+    }
+  }, [canvasRef]);
+
+  useEffect(() => {
     if (started) {
       generateProblem();
     }
@@ -92,10 +101,10 @@ export default function SlowMode({ started, setStarted }) {
       }
 
       const result = await response.json();
-      const predictedAnswer = parseInt(result.prediction, 10); 
+      const predictedAnswer = parseInt(result.predictions.full_number, 10); 
 
       if (isNaN(predictedAnswer)) {
-        throw new Error(`Received invalid prediction: ${result.prediction}`);
+        throw new Error(`Received invalid prediction: ${result.predictions.full_number}`);
       }
 
       if (predictedAnswer === problem.answer) {

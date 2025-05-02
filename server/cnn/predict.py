@@ -123,7 +123,7 @@ def segment_digits(image):
         valid_boxes = []
         for i, (x, y, w, h) in enumerate(bounding_boxes):
             aspect_ratio = w / h if h > 0 else 0
-            if 0.25 <= aspect_ratio <= 1.5 and h >= 8:
+            if 0.1 <= aspect_ratio <= 1.5 and h >= 8:
                 valid_boxes.append((i, (x, y, w, h)))
         if valid_boxes:
             indices, bounding_boxes = zip(*valid_boxes)
