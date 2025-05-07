@@ -48,15 +48,6 @@ export default function SlowMode({ started, setStarted }) {
   };
 
   useEffect(() => {
-    if (canvasRef.current) {
-      canvasRef.current.getSketchingTime().then((time) => {
-        console.log("Sketching time:", time); 
-      }
-    );
-    }
-  }, [canvasRef]);
-
-  useEffect(() => {
     if (started) {
       generateProblem();
     }

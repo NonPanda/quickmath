@@ -32,7 +32,7 @@ export default function QuickMode({ started, setStarted }) {
 
   useEffect(() => {
     if (started) {
-      setTimeLeft(10);
+      setTimeLeft(90);
       timerRef.current = setInterval(() => {
         setTimeLeft((prevTime) => {
           if (prevTime <= 1) {
