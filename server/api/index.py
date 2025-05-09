@@ -1,3 +1,2 @@
-import sys
-sys.path.append('../')
-from main import app
+from server.main import app
+

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { ArrowRight, RefreshCw, Lightbulb, Award, Pencil, CheckCircle } from "lucide-react";
 import { ReactSketchCanvas } from "react-sketch-canvas";
 
-const BACKEND_URL = "http://localhost:8000";
+const BACKEND_URL = import.meta.env.VITE_API_URL || "http://localhost:8000"; 
 
 export default function QuickMode({ started, setStarted }) {
   const [problem, setProblem] = useState({ question: "", answer: 0 });
