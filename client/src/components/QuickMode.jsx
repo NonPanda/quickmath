@@ -95,6 +95,7 @@ export default function QuickMode({ started, setStarted }) {
   }, [started]);
 
   const clearCanvas = () => {
+    clearTimeout(inactive.current);
     if (canvasRef.current) {
       canvasRef.current.clearCanvas();
       setFeedback(null);
@@ -171,7 +172,7 @@ export default function QuickMode({ started, setStarted }) {
       } else {
         setFeedback({
           status: "error",
-          message: `Hmm, AI read ${predictedAnswer}. The answer is ${problem.answer}. Try again!`,
+          message: `Detected ${predictedAnswer}, the answer is ${problem.answer}.`,
         });
       }
     } catch (error) {
@@ -235,13 +236,13 @@ export default function QuickMode({ started, setStarted }) {
           <>
             <div className="w-full md:w-1/2 bg-[#FAFAF8] dark:bg-gradient-to-t dark:from-gray-900 dark:via-gray-950/90 dark:to-gray-950 rounded-3xl shadow-md overflow-hidden border border-gray-200 dark:border-gray-700">
               <div className="flex items-center justify-between px-6 pt-4 bg-gray-50 dark:bg-gradient-to-b dark:from-gray-900/95 dark:via-gray-900 dark:to-gray-950 dark:border-gray-700">
-                <div className="flex gap-4 items-center text-xl font-semibold text-stext">
+                <div className="py-1.5 flex gap-4 items-center text-xl font-semibold text-stext">
                   Score: {score}
                 </div>
 
                 <div> 
                   {feedback && (
-                    <div className={`text-center px-3 py-2 rounded-xl ${
+                    <div className={`text-center px-3 py-1.5 rounded-xl ${
                       feedback.status === "success" 
                         ? "text-green-800 dark:bg-green-900 dark:text-green-100" 
                         : "text-red-800 dark:bg-red-900 dark:text-red-100"
@@ -253,13 +254,13 @@ export default function QuickMode({ started, setStarted }) {
 
                 <div className="flex items-center gap-2">
                   <div className="text-lg font-semibold text-stext flex items-center gap-2">
-                    Time Left: {timeformat(timeLeft)}
+                    Timer: {timeformat(timeLeft)}
                     <Lightbulb size={24} className="text-stext/90" />
                   </div>
                 </div>
               </div>
-              <div className="flex flex-col items-center space-y-4 md:space-y-6 py-8">
-                <div className="text-xl md:text-2xl text-gray-400 dark:text-gray-500 italic h-[48px] md:h-[56px] flex items-center justify-center">
+              <div className="flex flex-col justify-center items-center min-h-[60vh] space-y-4 md:space-y-6 py-8">
+                <div className="text-xl md:text-2xl text-gray-400 dark:text-gray-500 italic min-h-[48px] md:min-h-[56px] flex items-center justify-center">
                   {index > 0 && problems[index - 1] ? problems[index - 1].question : <span>&nbsp;</span>}
                 </div>
 
@@ -267,10 +268,11 @@ export default function QuickMode({ started, setStarted }) {
                   {problems[index] ? problems[index].question : ""}
                 </div>
 
-                <div className="text-xl md:text-2xl text-gray-400 dark:text-gray-500 italic h-[48px] md:h-[56px] flex items-center justify-center">
+                <div className="text-xl md:text-2xl text-gray-400 dark:text-gray-500 italic min-h-[48px] md:min-h-[56px] flex items-center justify-center">
                   {problems[index + 1] ? problems[index + 1].question : <span>&nbsp;</span>}
                 </div>
               </div>
+
             </div>
 
             <div className="w-full md:w-1/2 bg-[#f9f9f1] dark:bg-[#1F1F2E] rounded-t-3xl shadow-md overflow-hidden flex flex-col border border-gray-200 dark:border-gray-800" style={{ minHeight: '500px' }}> 

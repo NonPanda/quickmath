@@ -112,7 +112,7 @@ export default function SlowMode({ started, setStarted }) {
       } else {
         setFeedback({
           status: "error",
-          message: `Hmm, AI read ${predictedAnswer}. The answer is ${problem.answer}. Try again!`,
+          message: `Detected ${predictedAnswer}, the answer is ${problem.answer}.`,
         });
       }
     } catch (error) {
